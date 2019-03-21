@@ -1,11 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public class SelectionScript : MonoBehaviour
 {
     int item=1;
     public GameObject offchair, chandler, table, bed, bench, archair, archair2, stand, bcase, sink, sofa, couch, stove, fridge, couch2;
+    public void onBack()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+    public void onSelect()
+    {
+        PlayerPrefs.SetInt("item", item);
+        SceneManager.LoadScene("ArScene");
+    }
     public void Left()
     {  item--;
         switch(item)
