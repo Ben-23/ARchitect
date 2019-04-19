@@ -24,6 +24,7 @@ namespace GoogleARCore.Examples.HelloAR
     using GoogleARCore;
     using GoogleARCore.Examples.Common;
     using UnityEngine;
+    using UnityEngine.UI;
     using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
     // Set up touch input propagation while using Instant Preview in the editor.
@@ -35,6 +36,8 @@ namespace GoogleARCore.Examples.HelloAR
     /// </summary>
     public class HelloARController : MonoBehaviour
     {
+     
+        public Button BR, BL,BS;
         int count = 0,item;
         /// <summary>
         /// The first-person camera being used to render the passthrough camera image (i.e. AR background).
@@ -55,7 +58,7 @@ namespace GoogleARCore.Examples.HelloAR
         /// A model to place when a raycast from a user touch hits a feature point.
         /// </summary>
         public GameObject AndyPointPrefab;
-
+        public GameObject prefab;
         /// <summary>
         /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
         /// </summary>
@@ -65,7 +68,9 @@ namespace GoogleARCore.Examples.HelloAR
         /// The rotation in degrees need to apply to model when the Andy model is placed.
         /// </summary>
         private const float k_ModelRotation = 180.0f;
-
+        public TrackableHit hit;
+        public TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon |
+            TrackableHitFlags.FeaturePointWithSurfaceNormal;
         /// <summary>
         /// A list to hold all planes ARCore is tracking in the current frame. This object is used across
         /// the application to avoid per-frame allocations.
@@ -76,10 +81,40 @@ namespace GoogleARCore.Examples.HelloAR
         /// True if the app is in the process of quitting due to an ARCore connection error, otherwise false.
         /// </summary>
         private bool m_IsQuitting = false;
-
+        public Vector3 moveVector;
         /// <summary>
         /// The Unity Update() method.
         /// </summary>
+        GameObject andyObject;
+        public void PlaceObject()
+        {
+            // Instantiate Andy model at the hit pose.
+            andyObject = Instantiate(prefab, hit.Pose.position, hit.Pose.rotation);
+            DetectedPlanePrefab.SetActive(false);
+            // Compensate for the hitPose rotation facing away from the raycast (i.e. camera).
+            andyObject.transform.Rotate(0, k_ModelRotation, 0, Space.Self);
+
+            // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
+            // world evolves.
+            var anchor = hit.Trackable.CreateAnchor(hit.Pose);
+            BL.gameObject.SetActive(true);
+            BR.gameObject.SetActive(true);
+            BS.gameObject.SetActive(false);
+           
+            // Make Andy model a child of the anchor.
+            andyObject.transform.parent = anchor.transform;
+
+        }
+        public void RotateLeft()
+        {
+            andyObject.transform.Rotate(0,-1,0,Space.Self);
+
+        }
+        public void RotateRight()
+        {
+            andyObject.transform.Rotate(0,1, 0, Space.Self);
+
+        }
         public void Update()
         {
             _UpdateApplicationLifecycle();
@@ -106,9 +141,9 @@ namespace GoogleARCore.Examples.HelloAR
             }
 
             // Raycast against the location the player touched to search for planes.
-            TrackableHit hit;
+           /* TrackableHit hit;
             TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon |
-                TrackableHitFlags.FeaturePointWithSurfaceNormal;
+                TrackableHitFlags.FeaturePointWithSurfaceNormal;*/
             if (count == 0)
             {
                 if (Frame.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit))
@@ -125,63 +160,63 @@ namespace GoogleARCore.Examples.HelloAR
                     else
                     {
                         // Choose the Andy model for the Trackable that got hit.
-                        GameObject prefab;
-                        item = PlayerPrefs.GetInt("item",1);
-                       if (hit.Trackable is FeaturePoint)
+                        //GameObject prefab;
+                        item = PlayerPrefs.GetInt("item", 1);
+                        if (hit.Trackable is FeaturePoint)
                         {
-                             switch(item)
-                             {
-                                 case 1:
-                                     prefab = offchair;
-                                     break;
-                                 case 2:
-                                     prefab = chandler;
-                                     break;
-                                 case 3:
-                                     prefab = table;
-                                     break;
-                                 case 4:
-                                     prefab = bed;
-                                     break;
-                                 case 5:
-                                     prefab = bench;
-                                     break;
-                                 case 6:
-                                     prefab = archair;
-                                     break;
-                                 case 7:
-                                     prefab = archair2;
-                                     break;
-                                 case 8:
-                                     prefab = stand;
-                                     break;
-                                 case 9:
-                                     prefab = bcase;
-                                     break;
-                                 case 10:
-                                     prefab = sink;
-                                     break;
-                                 case 11:
-                                     prefab = sofa;
-                                     break;
-                                 case 12:
-                                     prefab = couch;
-                                     break;
-                                 case 13:
-                                     prefab = stove;
-                                     break;
-                                 case 14:
-                                     prefab = fridge;
-                                     break;
-                                 case 15:
-                                     prefab = couch2;
-                                     break;
+                            switch (item)
+                            {
+                                case 1:
+                                    prefab = offchair;
+                                    break;
+                                case 2:
+                                    prefab = chandler;
+                                    break;
+                                case 3:
+                                    prefab = table;
+                                    break;
+                                case 4:
+                                    prefab = bed;
+                                    break;
+                                case 5:
+                                    prefab = bench;
+                                    break;
+                                case 6:
+                                    prefab = archair;
+                                    break;
+                                case 7:
+                                    prefab = archair2;
+                                    break;
+                                case 8:
+                                    prefab = stand;
+                                    break;
+                                case 9:
+                                    prefab = bcase;
+                                    break;
+                                case 10:
+                                    prefab = sink;
+                                    break;
+                                case 11:
+                                    prefab = sofa;
+                                    break;
+                                case 12:
+                                    prefab = couch;
+                                    break;
+                                case 13:
+                                    prefab = stove;
+                                    break;
+                                case 14:
+                                    prefab = fridge;
+                                    break;
+                                case 15:
+                                    prefab = couch2;
+                                    break;
                                 default:
                                     _ShowAndroidToastMessage("No Furniture Selected");
                                     prefab = null;
                                     break;
                             }
-                           
+
                         }
                         else
                         {
@@ -237,23 +272,25 @@ namespace GoogleARCore.Examples.HelloAR
                                     prefab = null;
                                     break;
                             }
-                            
-                            
+
+
 
                         }
-
-                        // Instantiate Andy model at the hit pose.
+                    
+                        /*// Instantiate Andy model at the hit pose.
                         var andyObject = Instantiate(prefab, hit.Pose.position, hit.Pose.rotation);
-
+                        DetectedPlanePrefab.SetActive(false);
                         // Compensate for the hitPose rotation facing away from the raycast (i.e. camera).
                         andyObject.transform.Rotate(0, k_ModelRotation, 0, Space.Self);
 
                         // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
                         // world evolves.
                         var anchor = hit.Trackable.CreateAnchor(hit.Pose);
-
+                        BL.gameObject.SetActive(true);
+                        BR.gameObject.SetActive(true);
                         // Make Andy model a child of the anchor.
-                        andyObject.transform.parent = anchor.transform;
+                        andyObject.transform.parent = anchor.transform;*/
+                        
                     }
                 }
             }
