@@ -1,25 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="HelloARController.cs" company="Google">
-//
-// Copyright 2017 Google Inc. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// </copyright>
-//-----------------------------------------------------------------------
-
-namespace GoogleARCore.Examples.HelloAR
+﻿namespace GoogleARCore.Examples.HelloAR
 {
+    using System.Collections;
     using System.Collections.Generic;
     using GoogleARCore;
     using GoogleARCore.Examples.Common;
@@ -37,8 +18,9 @@ namespace GoogleARCore.Examples.HelloAR
     public class HelloARController : MonoBehaviour
     {
      
-        public Button BR, BL,BS;
-        int count = 0,item;
+        public Button BR, BL,BS,Set,Back,MLeft,MRight;
+        public Text hint;
+        int count = 0,setcount=0,item;
         /// <summary>
         /// The first-person camera being used to render the passthrough camera image (i.e. AR background).
         /// </summary>
@@ -57,7 +39,7 @@ namespace GoogleARCore.Examples.HelloAR
         /// <summary>
         /// A model to place when a raycast from a user touch hits a feature point.
         /// </summary>
-        public GameObject AndyPointPrefab;
+        //public GameObject AndyPointPrefab;
         public GameObject prefab;
         /// <summary>
         /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
@@ -86,6 +68,29 @@ namespace GoogleARCore.Examples.HelloAR
         /// The Unity Update() method.
         /// </summary>
         GameObject andyObject;
+        public void Scrnbck()
+        {
+            SceneManager.LoadScene("SelectionMenu");
+        }
+        public void Setter()
+        {
+            if (setcount == 0)
+            {
+                BL.gameObject.SetActive(true);
+                BR.gameObject.SetActive(true);
+                MLeft.gameObject.SetActive(true);
+                MRight.gameObject.SetActive(true);
+                setcount = 1;
+            }
+            else
+            {
+                BL.gameObject.SetActive(false);
+                BR.gameObject.SetActive(false);
+                MLeft.gameObject.SetActive(false);
+                MRight.gameObject.SetActive(false);
+                setcount = 0;
+            }
+        }
         public void PlaceObject()
         {
             // Instantiate Andy model at the hit pose.
@@ -97,13 +102,19 @@ namespace GoogleARCore.Examples.HelloAR
             // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
             // world evolves.
             var anchor = hit.Trackable.CreateAnchor(hit.Pose);
-            BL.gameObject.SetActive(true);
-            BR.gameObject.SetActive(true);
             BS.gameObject.SetActive(false);
-           
+            Set.gameObject.SetActive(true);           
             // Make Andy model a child of the anchor.
             andyObject.transform.parent = anchor.transform;
 
+        }
+        public void  MoveL()
+        {
+            andyObject.transform.Translate(0.1f, 0, 0, Space.Self);
+        }
+        public void MoveR()
+        {
+            andyObject.transform.Translate(-0.1f, 0, 0, Space.Self);
         }
         public void RotateLeft()
         {
@@ -132,22 +143,19 @@ namespace GoogleARCore.Examples.HelloAR
             }
 
             SearchingForPlaneUI.SetActive(showSearchingUI);
-
+            hint.gameObject.SetActive(true);
             // If the player has not touched the screen, we are done with this update.
             Touch touch;
             if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Began)
             {
                 return;
             }
-
-            // Raycast against the location the player touched to search for planes.
-           /* TrackableHit hit;
-            TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon |
-                TrackableHitFlags.FeaturePointWithSurfaceNormal;*/
             if (count == 0)
             {
+                
                 if (Frame.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit))
                 {
+                    hint.gameObject.SetActive(false);
                     count++;
                     // Use hit pose and camera pose to check if hittest is from the
                     // back of the plane, if it is, no need to create the anchor.
@@ -159,6 +167,7 @@ namespace GoogleARCore.Examples.HelloAR
                     }
                     else
                     {
+                        hint.gameObject.SetActive(false);
                         // Choose the Andy model for the Trackable that got hit.
                         //GameObject prefab;
                         item = PlayerPrefs.GetInt("item", 1);
@@ -273,7 +282,7 @@ namespace GoogleARCore.Examples.HelloAR
                                     break;
                             }
 
-
+                            
 
                         }
                     
