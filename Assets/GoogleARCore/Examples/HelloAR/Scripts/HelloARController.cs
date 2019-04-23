@@ -19,7 +19,7 @@
     {
      
         public Button BR, BL,BS,Set,Back,MLeft,MRight;
-        public Text hint;
+        public Text hint,rotate,move;
         int count = 0,setcount=0,item;
         /// <summary>
         /// The first-person camera being used to render the passthrough camera image (i.e. AR background).
@@ -80,6 +80,9 @@
                 BR.gameObject.SetActive(true);
                 MLeft.gameObject.SetActive(true);
                 MRight.gameObject.SetActive(true);
+                rotate.gameObject.SetActive(true);
+                move.gameObject.SetActive(true);
+
                 setcount = 1;
             }
             else
@@ -88,6 +91,8 @@
                 BR.gameObject.SetActive(false);
                 MLeft.gameObject.SetActive(false);
                 MRight.gameObject.SetActive(false);
+                rotate.gameObject.SetActive(false);
+                move.gameObject.SetActive(false);
                 setcount = 0;
             }
         }
